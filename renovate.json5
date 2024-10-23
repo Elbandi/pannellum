@@ -1,63 +1,57 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "configMigration": true,
-  "extends": [
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  configMigration: true,
+  extends: [
     'config:recommended',
-
-    // Make sure we get a single PR combining all updates
     'group:all',
   ],
-  "automerge": false,
-  "separateMinorPatch": true,
-  "gitAuthor": "renovate[bot] <bot@renovateapp.com>",
-  "enabledManagers": [
-    "dockerfile",
-    "custom.regex"
+  automerge: false,
+  separateMinorPatch: true,
+  gitAuthor: 'renovate[bot] <bot@renovateapp.com>',
+  enabledManagers: [
+    'dockerfile',
+    'custom.regex',
   ],
-  "packageRules": [
+  packageRules: [
     {
-      "matchDatasources": [
-        "repology"
+      matchDatasources: [
+        'repology',
       ],
-      "matchPackagePatterns": [
-        "^debian_"
+      groupName: 'debian packages',
+      groupSlug: 'debian',
+      matchPackageNames: [
+        '/^debian_/',
       ],
-      "groupName": "debian packages",
-      "groupSlug": "debian"
     },
     {
-      "matchDatasources": [
-        "repology"
+      matchDatasources: [
+        'repology',
       ],
-      "matchPackagePatterns": [
-        "^ubuntu_"
+      groupName: 'ubuntu packages',
+      groupSlug: 'ubuntu',
+      matchPackageNames: [
+        '/^ubuntu_/',
       ],
-      "groupName": "ubuntu packages",
-      "groupSlug": "ubuntu"
-    }
+    },
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "description": "Update packages set in Dockerfiles",
-      "customType": "regex",
-      "fileMatch": [
-          '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
-          '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+      description: 'Update packages set in Dockerfiles',
+      customType: 'regex',
+      fileMatch: [
+        '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
+        '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
       ],
-      "matchStrings": [
-        "#\\srenovate:\\sdatasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.*?))?\\s(ENV|ARG) .*?_VERSION=\"(?<currentValue>.*)\"\\s"
+      matchStrings: [
+        '#\\srenovate:\\sdatasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.*?))?\\s(ENV|ARG) .*?_VERSION="(?<currentValue>.*)"\\s',
       ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}loose{{/if}}",
-      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}repology{{/if}}"
-    }
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}loose{{/if}}',
+      datasourceTemplate: '{{#if datasource}}{{{datasource}}}{{else}}repology{{/if}}',
+    },
   ],
-
-  // Disable dependency dashboard
-  "dependencyDashboard": false,
-
-  // Use our labelling system
-  "labels": ['dependencies'],
-
-  // We generally always want the major version
-  "separateMajorMinor": false,
+  dependencyDashboard: false,
+  labels: [
+    'dependencies',
+  ],
+  separateMajorMinor: false,
 }
