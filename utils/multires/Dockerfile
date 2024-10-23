@@ -6,7 +6,7 @@ FROM ubuntu:24.04@sha256:3f85b7caad41a95462cf5b787d8a04604c8262cdcdf9a472b8c52ef
 # docker run -it -v $PWD:/data generate-panorama /data/image.jpg
 
 # renovate: datasource=repology depName=ubuntu_24_04/python3-defaults versioning=loose
-ARG PYTHON3_VERSION="3.12.3-0ubuntu1"
+ARG PYTHON3_VERSION="3.12.3-0ubuntu2"
 
 # renovate: datasource=repology depName=ubuntu_24_04/numpy versioning=loose
 ARG PYTHON3_NUMPY_VERSION="1:1.26.4+ds-6ubuntu1"
