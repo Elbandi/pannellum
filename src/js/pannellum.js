@@ -629,11 +629,11 @@ function parseGPanoXMP(image, url) {
                         config.horizonRoll = xmp.horizonRoll;
                 }
                 
-                if (xmp.pitch != null && specifiedPhotoSphereExcludes.indexOf('pitch') < 0)
+                if (xmp.pitch !== null && specifiedPhotoSphereExcludes.indexOf('pitch') < 0)
                     config.pitch = xmp.pitch;
-                if (xmp.yaw != null && specifiedPhotoSphereExcludes.indexOf('yaw') < 0)
+                if (xmp.yaw !== null && specifiedPhotoSphereExcludes.indexOf('yaw') < 0)
                     config.yaw = xmp.yaw;
-                if (xmp.hfov != null && specifiedPhotoSphereExcludes.indexOf('hfov') < 0)
+                if (xmp.hfov !== null && specifiedPhotoSphereExcludes.indexOf('hfov') < 0)
                     config.hfov = xmp.hfov;
             }
         }
@@ -803,7 +803,6 @@ function onDocumentMouseDown(event) {
     stopAnimation();
 
     stopOrientation();
-    config.roll = 0;
 
     speed.hfov = 0;
 
@@ -932,7 +931,6 @@ function onDocumentTouchStart(event) {
     stopAnimation();
 
     stopOrientation();
-    config.roll = 0;
 
     speed.hfov = 0;
 
@@ -1181,7 +1179,6 @@ function onDocumentKeyPress(event) {
     latestInteraction = Date.now();
 
     stopOrientation();
-    config.roll = 0;
 
     // Record key pressed
     var keynumber = event.which || event.keycode;
@@ -1552,7 +1549,7 @@ function animate() {
         prevTime = undefined;
         var autoRotateStartTime = config.autoRotateInactivityDelay -
             (Date.now() - latestInteraction);
-        if (autoRotateStartTime > 0) {
+        if (autoRotateStartTime > 0 && autoRotateSpeed) {
             autoRotateStart = setTimeout(function() {
                 config.autoRotate = autoRotateSpeed;
                 _this.lookAt(origPitch, undefined, origHfov, 3000);
@@ -2083,12 +2080,10 @@ function renderHotSpot(hs) {
         coord[1] += (canvasHeight - hs.div.offsetHeight) / 2;
         var transform = 'translate(' + coord[0] + 'px, ' + coord[1] +
             'px) translateZ(9999px) rotate(' + config.roll + 'deg)';
-        if (hs.scale) {
-            if (typeof hs.scale == 'number')
-                transform += ' scale(' + hs.scale + ')';
-            else
-                transform += ' scale(' + (origHfov/config.hfov) / z + ')';
-        }
+        if (hs.scale)
+            transform += ' scale(' + (hs.scaleFactor || 1) * (origHfov/config.hfov) / z + ')';
+        else if (hs.scaleFactor)
+            transform += ' scale(' + hs.scaleFactor + ')';
         hs.div.style.webkitTransform = transform;
         hs.div.style.MozTransform = transform;
         hs.div.style.transform = transform;
@@ -2111,7 +2106,7 @@ function renderHotSpots() {
 function mergeConfig(sceneId) {
     config = {};
     var k, s;
-    var photoSphereExcludes = ['haov', 'vaov', 'vOffset', 'northOffset', 'horizonPitch', 'horizonRoll'];
+    var photoSphereExcludes = ['haov', 'vaov', 'vOffset', 'northOffset', 'horizonPitch', 'horizonRoll', 'pitch', 'yaw', 'hfov'];
     specifiedPhotoSphereExcludes = [];
     
     // Merge default config
@@ -2571,6 +2566,7 @@ function stopOrientation() {
     window.removeEventListener('deviceorientation', orientationListener);
     controls.orientation.classList.remove('pnlm-orientation-button-active');
     orientation = false;
+    config.roll = 0;
 }
 
 /**
@@ -2725,6 +2721,8 @@ this.setPitch = function(pitch, animated, callback, callbackArgs) {
             setTimeout(function(){callback(callbackArgs);}, animated);
     } else {
         config.pitch = pitch;
+        if (typeof callback == 'function')
+            callback(callbackArgs);
     }
     animateInit();
     return this;
@@ -2799,6 +2797,8 @@ this.setYaw = function(yaw, animated, callback, callbackArgs) {
             setTimeout(function(){callback(callbackArgs);}, animated);
     } else {
         config.yaw = yaw;
+        if (typeof callback == 'function')
+            callback(callbackArgs);
     }
     animateInit();
     return this;
@@ -2866,6 +2866,8 @@ this.setHfov = function(hfov, animated, callback, callbackArgs) {
             setTimeout(function(){callback(callbackArgs);}, animated);
     } else {
         setHfov(hfov);
+        if (typeof callback == 'function')
+            callback(callbackArgs);
     }
     animateInit();
     return this;
@@ -3223,7 +3225,9 @@ this.addHotSpot = function(hs, sceneId) {
 };
 
 /**
- * Remove a hot spot.
+ * Remove a hot spot. To use this method, the user must create each hot spot
+ * with a unique ID within a given scene. Behavior for duplicate IDs is
+ * considered undefined, and hot spots created without an ID cannot be removed.
  * @memberof Viewer
  * @instance
  * @param {string} hotSpotId - The ID of the hot spot
